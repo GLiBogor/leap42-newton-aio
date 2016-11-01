@@ -13,7 +13,7 @@ if [ $? -ne 0 ]
     echo "server 2.opensuse.pool.ntp.org iburst" >> /etc/ntp.conf
     echo "server 3.opensuse.pool.ntp.org iburst" >> /etc/ntp.conf
     systemctl enable ntpd.service
-    systemctl start ntpd.service
+    systemctl restart ntpd.service
     systemctl status ntpd.service
 fi
 ntpq -p
@@ -39,7 +39,7 @@ collation-server = utf8_general_ci
 character-set-server = utf8
 _EOF_
     systemctl enable mysql.service
-    systemctl start mysql.service
+    systemctl restart mysql.service
     systemctl status mysql.service
     mysql -e "UPDATE mysql.user SET Password=PASSWORD('$PASSWORD') WHERE User='root';"
     mysql -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
@@ -52,7 +52,7 @@ fi
 ##### RabbitMQ Service #####
 zypper -n in --no-recommends rabbitmq-server
 systemctl enable rabbitmq-server.service
-systemctl retart rabbitmq-server.service
+systemctl restart rabbitmq-server.service
 systemctl status rabbitmq-server.service
 rabbitmqctl add_user openstack $PASSWORD
 rabbitmqctl set_permissions openstack ".*" ".*" ".*"
