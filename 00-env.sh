@@ -2,6 +2,7 @@
 
 source os.conf
 
+
 ##### NTP Service #####
 [ ! -f /etc/ntp.conf.orig ] && cp -v /etc/ntp.conf /etc/ntp.conf.orig
 grep opensuse.pool.ntp.org /etc/ntp.conf > /dev/null 2>&1
@@ -17,15 +18,14 @@ if [ $? -ne 0 ]
 fi
 ntpq -p
 
-##### Repositories #####
-if [ ! -f /etc/zypp/repos.d/Newton.repo ]
-  then
-    zypper ar -f obs://Cloud:OpenStack:Newton/openSUSE_Leap_42.1 Newton
-    zypper --gpg-auto-import-keys ref && zypper -n up --skip-interactive
-    zypper -n in --no-recommends python-openstackclient
-fi
 
-##### MySQL Database Service #####
+##### Repositories #####
+[ ! -f /etc/zypp/repos.d/Newton.repo ] && zypper ar -f obs://Cloud:OpenStack:Newton/openSUSE_Leap_42.1 Newton
+zypper --gpg-auto-import-keys ref && zypper -n up --skip-interactive
+zypper -n in --no-recommends python-openstackclient
+
+
+##### MariaDB Database Service #####
 zypper -n in --no-recommends mariadb-client mariadb python-PyMySQL
 if [ ! -f /etc/my.cnf.d/openstack.cnf ]
   then
@@ -47,6 +47,7 @@ _EOF_
     mysql -e "DELETE FROM mysql.db WHERE Db='test' OR Db='test\_%';"
     mysql -e "FLUSH PRIVILEGES;"
 fi
+
 
 ##### RabbitMQ Service #####
 zypper -n in --no-recommends rabbitmq-server
