@@ -54,5 +54,6 @@ zypper -n in --no-recommends rabbitmq-server
 systemctl enable rabbitmq-server.service
 systemctl restart rabbitmq-server.service
 systemctl status rabbitmq-server.service
+sleep 10
 rabbitmqctl add_user openstack $PASSWORD
 rabbitmqctl set_permissions openstack ".*" ".*" ".*"
