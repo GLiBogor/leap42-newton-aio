@@ -57,3 +57,10 @@ systemctl status rabbitmq-server.service
 sleep 10
 rabbitmqctl add_user openstack $PASSWORD
 rabbitmqctl set_permissions openstack ".*" ".*" ".*"
+
+
+##### Memcached Service #####
+zypper -n in --no-recommends memcached python-python-memcached
+systemctl enable memcached.service
+systemctl restart memcached.service
+systemctl status memcached.service
