@@ -1,5 +1,7 @@
 # leap-newton-aio
 
+Main references: http://docs.openstack.org/newton/install-guide-obs/
+
 This is BASH scripts for practicing create all OpenStack services in one openSUSE Leap 42 node.
 
 Requirements:
