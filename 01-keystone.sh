@@ -15,7 +15,7 @@ zypper -n in --no-recommends openstack-keystone apache2-mod_wsgi
 grep '^connection = mysql+pymysql://keystone:' /etc/keystone/keystone.conf > /dev/null 2>&1 && grep '^provider = fernet' /etc/keystone/keystone.conf > /dev/null 2>&1
 if [ $? -ne 0 ]
   then
-    sed -i 's/connection\ \=\ sqlite\:\/\/\/\/var\/lib\/keystone\/keystone\.db/\#connection\ \=\ sqlite\:\/\/\/\/var\/lib\/keystone\/keystone\.db/g' /etc/keystone/keystone.conf
+    sed -i 's/connection = sqlite:\/\/\/\/var\/lib\/keystone\/keystone.db/#connection = sqlite:\/\/\/\/var\/lib\/keystone\/keystone.db/g' /etc/keystone/keystone.conf
 cat << _EOF_ >> /etc/keystone/keystone.conf
 [database]
 connection = mysql+pymysql://keystone:$PASSWORD@$HOSTNAME/keystone
@@ -33,7 +33,7 @@ keystone-manage bootstrap --bootstrap-password $PASSWORD --bootstrap-admin-url h
 grep '^APACHE_SERVERNAME=""$' /etc/sysconfig/apache2 > /dev/null 2>&1
 if [ $? -eq 0 ]
   then
-    sed -i 's/APACHE\_SERVERNAME\=\"\"/\#APACHE\_SERVERNAME\=\"\"/g' /etc/sysconfig/apache2
+    sed -i 's/APACHE_SERVERNAME=""/#APACHE_SERVERNAME=""/g' /etc/sysconfig/apache2
     cat << _EOF_ >> /etc/sysconfig/apache2
 APACHE_SERVERNAME="$HOSTNAME"
 _EOF_
