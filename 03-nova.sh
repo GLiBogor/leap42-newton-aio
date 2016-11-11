@@ -84,12 +84,17 @@ username = nova
 password = $PASSWORD
 
 [neutron]
+url = http://$HOSTNAME:9696
+auth_url = http://$HOSTNAME:35357
 auth_type = password
+project_domain_name = default
+user_domain_name = default
+region_name = RegionOne
+project_name = service
 username = neutron
-password = %SERVICE_PASSWORD%
-user_domain_id = default
-project_name = %SERVICE_TENANT_NAME%
-project_domain_id = default
+password = $PASSWORD
+service_metadata_proxy = True
+metadata_proxy_shared_secret = $PASSWORD
 
 [oslo_concurrency]
 lock_path = /var/run/nova
