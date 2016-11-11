@@ -46,7 +46,7 @@ if [ $? -ne 0 ]
   then
     openstack endpoint create --region RegionOne compute admin http://$HOSTNAME:8774/v2.1/%\(tenant_id\)s
 fi
-zypper -n in --no-recommends openstack-nova-api openstack-nova-scheduler openstack-nova-conductor openstack-nova-consoleauth openstack-nova-novncproxy iptables
+zypper -n in --no-recommends openstack-nova-api openstack-nova-scheduler openstack-nova-conductor openstack-nova-consoleauth openstack-nova-novncproxy iptables openstack-nova-compute genisoimage kvm libvirt
 
 [ ! -f /etc/nova/nova.conf.orig ] && cp -v /etc/nova/nova.conf /etc/nova/nova.conf.orig
 cat << _EOF_ > /etc/nova/nova.conf
@@ -97,11 +97,21 @@ lock_path = /var/run/nova
 [vnc]
 vncserver_listen = $my_ip
 vncserver_proxyclient_address = $my_ip
+enabled = True
+novncproxy_base_url = http://$HOSTNAME:6080/vnc_auto.html
 
 [glance]
 api_servers = http://$HOSTNAME:9292
+
+[libvirt]
+virt_type = qemu
 _EOF_
 
-systemctl enable openstack-nova-api.service openstack-nova-consoleauth.service openstack-nova-scheduler.service openstack-nova-conductor.service openstack-nova-novncproxy.service
-systemctl restart openstack-nova-api.service openstack-nova-consoleauth.service openstack-nova-scheduler.service openstack-nova-conductor.service openstack-nova-novncproxy.service
-systemctl status openstack-nova-api.service openstack-nova-consoleauth.service openstack-nova-scheduler.service openstack-nova-conductor.service openstack-nova-novncproxy.service
+modprobe nbd
+echo nbd > /etc/modules-load.d/nbd.conf
+
+systemctl enable openstack-nova-api.service openstack-nova-consoleauth.service openstack-nova-scheduler.service openstack-nova-conductor.service openstack-nova-novncproxy.service libvirtd.service openstack-nova-compute.service
+systemctl restart openstack-nova-api.service openstack-nova-consoleauth.service openstack-nova-scheduler.service openstack-nova-conductor.service openstack-nova-novncproxy.service libvirtd.service openstack-nova-compute.service
+systemctl status openstack-nova-api.service openstack-nova-consoleauth.service openstack-nova-scheduler.service openstack-nova-conductor.service openstack-nova-novncproxy.service libvirtd.service openstack-nova-compute.service
+sleep 10
+openstack compute service list
