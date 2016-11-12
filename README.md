@@ -12,6 +12,6 @@ __Requirements__
 
 __Topology__
 
-Below is topology if practice is using VM in VirtualBox
+Below is topology if the practice is using VM in VirtualBox
 ![alt tag](https://raw.githubusercontent.com/GLiBogor/leap42-newton-aio/master/leap42-newton-aio.png)
 
