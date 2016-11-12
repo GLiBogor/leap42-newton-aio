@@ -8,7 +8,7 @@ __Requirements__
 * CPU 4 cores
 * RAM 8 GB
 * HDD 30 GB (sda1 / 16GB XFS, sda2 SWAP 4GB, sda3 Extended all remaining disk space, sda5 LVM 5GB, sda6 XFS 1GB, sda7 XFS 1GB)
-* openSUSE Leap 42
+* openSUSE Leap 42 minimal installation
 
 __Topology__
 
