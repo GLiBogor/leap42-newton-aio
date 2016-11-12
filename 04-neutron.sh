@@ -8,7 +8,7 @@ mysql -u root -p$PASSWORD -e "SHOW DATABASES;" | grep neutron > /dev/null 2>&1 &
 if [ $? -ne 0 ]
   then
     mysql -u root -p$PASSWORD -e "CREATE DATABASE neutron; GRANT ALL PRIVILEGES ON neutron.* TO 'neutron'@'localhost' IDENTIFIED BY '$PASSWORD'; GRANT ALL PRIVILEGES ON neutron.* TO 'neutron'@'%' IDENTIFIED BY '$PASSWORD';"
-  fi
+fi
 
 openstack user list | grep neutron > /dev/null 2>&1 && echo "neutron user exists"
 if [ $? -ne 0 ]
