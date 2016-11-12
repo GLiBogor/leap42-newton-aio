@@ -50,16 +50,13 @@ log_dir = /var/log/glance
 notification_driver = messaging
 lock_path = /var/run/glance
 
-
 [database]
 connection = mysql+pymysql://glance:$PASSWORD@$HOSTNAME/glance
-
 
 [glance_store]
 filesystem_store_datadir = /var/lib/glance/images/
 stores = file,http
 default_store = file
-
 
 [keystone_authtoken]
 signing_dir = /var/cache/glance/keystone-signing
@@ -72,7 +69,6 @@ user_domain_name = default
 project_name = service
 username = glance
 password = $PASSWORD
-
 
 [paste_deploy]
 flavor = keystone
