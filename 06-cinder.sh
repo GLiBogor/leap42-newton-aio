@@ -109,13 +109,13 @@ iscsi_protocol = iscsi
 iscsi_helper = tgtadm
 _EOF_
 
-pvs | grep "/dev/${IDDISK}6" > /dev/null 2>&1 && echo "PV /dev/${IDDISK}6 exists"
+pvs | grep "/dev/${IDDISK}5" > /dev/null 2>&1 && echo "PV /dev/${IDDISK}5 exists"
 if [ $? -ne 0 ]
   then
-    pvcreate /dev/${IDDISK}6
+    pvcreate /dev/${IDDISK}5
     pvs
 fi
-vgcreate cinder-volumes /dev/${IDDISK}6
+vgcreate cinder-volumes /dev/${IDDISK}5
 
 echo "include /var/lib/cinder/volumes/*" > /etc/tgt/conf.d/cinder.conf
 
