@@ -1,6 +1,6 @@
 # leap-newton-aio
 
-This is BASH scripts for practicing create all OpenStack services in one openSUSE Leap 42 node.
+This is BASH scripts for practicing create all OpenStack Newton services in one openSUSE Leap 42 node.
 
 Main reference: http://docs.openstack.org/newton/install-guide-obs/
 
