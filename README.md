@@ -12,5 +12,6 @@ __Requirements__
 
 __Topology__
 
+Below is topology if using VM in VirtualBox
 ![alt tag](https://raw.githubusercontent.com/GLiBogor/leap42-newton-aio/master/leap42-newton-aio.png)
 
