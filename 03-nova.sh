@@ -100,10 +100,10 @@ metadata_proxy_shared_secret = $PASSWORD
 lock_path = /var/run/nova
 
 [vnc]
-vncserver_listen = $my_ip
-vncserver_proxyclient_address = $my_ip
+vncserver_listen = $IPMAN
+vncserver_proxyclient_address = $IPMAN
 enabled = True
-novncproxy_base_url = http://$my_ip:6080/vnc_auto.html
+novncproxy_base_url = http://$IPMAN:6080/vnc_auto.html
 
 [glance]
 api_servers = http://$HOSTNAME:9292
