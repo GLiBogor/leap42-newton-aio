@@ -1,4 +1,4 @@
-# leap-newton-aio
+# leap42-newton-aio
 
 This is BASH scripts for practicing create all OpenStack Newton services in one openSUSE Leap 42 node.
 
