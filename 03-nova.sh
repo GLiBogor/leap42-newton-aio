@@ -110,6 +110,9 @@ api_servers = http://$HOSTNAME:9292
 
 [libvirt]
 virt_type = qemu
+
+[cinder]
+os_region_name = RegionOne
 _EOF_
 
 modprobe nbd
