@@ -17,7 +17,7 @@ openstack endpoint list | grep internal | grep glance > /dev/null 2>&1 && echo "
 
 openstack endpoint list | grep admin | grep glance > /dev/null 2>&1 && echo "glance admin endpoint already exists" || openstack endpoint create --region RegionOne image admin http://$HOSTNAME:9292
 
-echo "install packages" && zypper -n in --no-recommends openstack-glance openstack-glance-api openstack-glance-registry > /dev/null 2>&1
+echo -n "installing packages... " && zypper -n in --no-recommends openstack-glance openstack-glance-api openstack-glance-registry > /dev/null 2>&1 && echo "done"
 
 [ ! -f /etc/glance/glance-api.conf.orig ] && cp -v /etc/glance/glance-api.conf /etc/glance/glance-api.conf.orig
 cat << _EOF_ > /etc/glance/glance-api.conf
