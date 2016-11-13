@@ -4,44 +4,20 @@ source os.conf
 source admin-openrc
 
 ##### Nutron Networking Service #####
-mysql -u root -p$PASSWORD -e "SHOW DATABASES;" | grep neutron > /dev/null 2>&1 && echo "neutron database exists"
-if [ $? -ne 0 ]
-  then
-    mysql -u root -p$PASSWORD -e "CREATE DATABASE neutron; GRANT ALL PRIVILEGES ON neutron.* TO 'neutron'@'localhost' IDENTIFIED BY '$PASSWORD'; GRANT ALL PRIVILEGES ON neutron.* TO 'neutron'@'%' IDENTIFIED BY '$PASSWORD';"
-fi
+mysql -u root -p$PASSWORD -e "SHOW DATABASES;" | grep neutron > /dev/null 2>&1 && echo "neutron database already exists" || mysql -u root -p$PASSWORD -e "CREATE DATABASE neutron; GRANT ALL PRIVILEGES ON neutron.* TO 'neutron'@'localhost' IDENTIFIED BY '$PASSWORD'; GRANT ALL PRIVILEGES ON neutron.* TO 'neutron'@'%' IDENTIFIED BY '$PASSWORD';"
 
-openstack user list | grep neutron > /dev/null 2>&1 && echo "neutron user exists"
-if [ $? -ne 0 ]
-  then
-    openstack user create --domain default --password $PASSWORD neutron
-fi
+openstack user list | grep neutron > /dev/null 2>&1 && echo "neutron user already exists" || openstack user create --domain default --password $PASSWORD neutron
 openstack role add --project service --user neutron admin
 
-openstack service list | grep neutron > /dev/null 2>&1 && echo "neutron service exists"
-if [ $? -ne 0 ]
-  then
-    openstack service create --name neutron --description "OpenStack Networking service" network
-fi
+openstack service list | grep neutron > /dev/null 2>&1 && echo "neutron service already exists" || openstack service create --name neutron --description "OpenStack Networking service" network
 
-openstack endpoint list | grep public | grep neutron > /dev/null 2>&1 && echo "neutron public endpoint exists"
-if [ $? -ne 0 ]
-  then
-    openstack endpoint create --region RegionOne network public http://$HOSTNAME:9696
-fi
+openstack endpoint list | grep public | grep neutron > /dev/null 2>&1 && echo "neutron public endpoint already exists" || openstack endpoint create --region RegionOne network public http://$HOSTNAME:9696
 
-openstack endpoint list | grep internal | grep neutron > /dev/null 2>&1 && echo "neutron internal endpoint exists"
-if [ $? -ne 0 ]
-  then
-    openstack endpoint create --region RegionOne network internal http://$HOSTNAME:9696
-fi
+openstack endpoint list | grep internal | grep neutron > /dev/null 2>&1 && echo "neutron internal endpoint exists" || openstack endpoint create --region RegionOne network internal http://$HOSTNAME:9696
 
-openstack endpoint list | grep admin | grep neutron > /dev/null 2>&1 && echo "neutron admin endpoint exists"
-if [ $? -ne 0 ]
-  then
-    openstack endpoint create --region RegionOne neutron admin http://$HOSTNAME:9696
-fi
+openstack endpoint list | grep admin | grep neutron > /dev/null 2>&1 && echo "neutron admin endpoint already exists" || openstack endpoint create --region RegionOne neutron admin http://$HOSTNAME:9696
 
-zypper -n in --no-recommends openstack-neutron openstack-neutron-server openstack-neutron-linuxbridge-agent openstack-neutron-l3-agent openstack-neutron-dhcp-agent openstack-neutron-metadata-agent bridge-utils
+echo -n "installing packages... " && zypper -n in --no-recommends openstack-neutron openstack-neutron-server openstack-neutron-linuxbridge-agent openstack-neutron-l3-agent openstack-neutron-dhcp-agent openstack-neutron-metadata-agent bridge-utils > /dev/null 2>&1 && echo "done"
 
 [ ! -f /etc/neutron/neutron.conf.orig ] && cp -v /etc/neutron/neutron.conf /etc/neutron/neutron.conf.orig
 cat << _EOF_ > /etc/neutron/neutron.conf
@@ -152,6 +128,7 @@ _EOF_
 systemctl enable openstack-neutron.service openstack-neutron-linuxbridge-agent.service openstack-neutron-dhcp-agent.service openstack-neutron-metadata-agent.service openstack-neutron-l3-agent.service
 systemctl restart openstack-neutron.service openstack-neutron-linuxbridge-agent.service openstack-neutron-dhcp-agent.service openstack-neutron-metadata-agent.service openstack-neutron-l3-agent.service
 systemctl status openstack-neutron.service openstack-neutron-linuxbridge-agent.service openstack-neutron-dhcp-agent.service openstack-neutron-metadata-agent.service openstack-neutron-l3-agent.service
+sleep 5
 
 neutron ext-list
 openstack network agent list
