@@ -6,7 +6,7 @@ source admin-openrc
 ##### Keystone Identity Service #####
 mysql -u root -p$PASSWORD -e "SHOW DATABASES;" | grep keystone > /dev/null 2>&1 && echo "keystone database already exists" || mysql -u root -p$PASSWORD -e "CREATE DATABASE keystone; GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'localhost' IDENTIFIED BY '$PASSWORD'; GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'%' IDENTIFIED BY '$PASSWORD';"
 
-echo "install packages" && zypper -n in --no-recommends openstack-keystone apache2-mod_wsgi > /dev/null 2>&1
+echo -n "installing packages... " && zypper -n in --no-recommends openstack-keystone apache2-mod_wsgi > /dev/null 2>&1 && echo "done"
 
 [ ! -f /etc/keystone/keystone.conf.orig ] && cp -v /etc/keystone/keystone.conf /etc/keystone/keystone.conf.orig
 cat << _EOF_ > /etc/keystone/keystone.conf
