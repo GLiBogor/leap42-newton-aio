@@ -4,8 +4,8 @@ source os.conf
 source admin-openrc
 
 ##### Horizon Dashboard #####
-zypper -n in --no-recommends openstack-dashboard
-cp /etc/apache2/conf.d/openstack-dashboard.conf.sample /etc/apache2/conf.d/openstack-dashboard.conf
+echo -n "installing packages... " && zypper -n in --no-recommends openstack-dashboard > /dev/null 2>&1 && echo "done"
+[ ! -f /etc/apache2/conf.d/openstack-dashboard.conf ] && cp /etc/apache2/conf.d/openstack-dashboard.conf.sample /etc/apache2/conf.d/openstack-dashboard.conf
 a2enmod rewrite
 a2enmod deflate
 [ ! -f /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py.orig ] && cp -v /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py /srv/www/openstack-dashboard/openstack_dashboard/local/local_settings.py.orig
