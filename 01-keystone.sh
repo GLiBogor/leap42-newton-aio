@@ -4,25 +4,28 @@ source os.conf
 source admin-openrc
 
 ##### Keystone Identity Service #####
-mysql -u root -p$PASSWORD -e "SHOW DATABASES;" | grep keystone > /dev/null 2>&1 && echo "keystone database exists"
-if [ $? -ne 0 ]
-  then
-    mysql -u root -p$PASSWORD -e "CREATE DATABASE keystone; GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'localhost' IDENTIFIED BY '$PASSWORD'; GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'%' IDENTIFIED BY '$PASSWORD';"
-  fi
-zypper -n in --no-recommends openstack-keystone apache2-mod_wsgi
+mysql -u root -p$PASSWORD -e "SHOW DATABASES;" | grep keystone > /dev/null 2>&1 && echo "keystone database already exists" || mysql -u root -p$PASSWORD -e "CREATE DATABASE keystone; GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'localhost' IDENTIFIED BY '$PASSWORD'; GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'%' IDENTIFIED BY '$PASSWORD';"
+
+echo "install packages" && zypper -n in --no-recommends openstack-keystone apache2-mod_wsgi > /dev/null 2>&1
 
 [ ! -f /etc/keystone/keystone.conf.orig ] && cp -v /etc/keystone/keystone.conf /etc/keystone/keystone.conf.orig
-grep '^connection = mysql+pymysql://keystone:' /etc/keystone/keystone.conf > /dev/null 2>&1 && grep '^provider = fernet' /etc/keystone/keystone.conf > /dev/null 2>&1
-if [ $? -ne 0 ]
-  then
-    sed -i 's/connection = sqlite:\/\/\/\/var\/lib\/keystone\/keystone.db/#connection = sqlite:\/\/\/\/var\/lib\/keystone\/keystone.db/g' /etc/keystone/keystone.conf
-cat << _EOF_ >> /etc/keystone/keystone.conf
+cat << _EOF_ > /etc/keystone/keystone.conf
+[DEFAULT]
+verbose = True
+log_dir = /var/log/keystone
+
+[catalog]
+driver = sql
+
 [database]
 connection = mysql+pymysql://keystone:$PASSWORD@$HOSTNAME/keystone
+
+[signing]
+cert_subject = /C=US/ST=Unset/L=Unset/O=Unset/CN=pod10
+
 [token]
 provider = fernet
 _EOF_
-fi
 
 su -s /bin/sh -c "keystone-manage db_sync" keystone
 keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone
@@ -76,20 +79,18 @@ Listen 35357
 </VirtualHost>
 _EOF_
 fi
+
 chown -R keystone:keystone /etc/keystone
 systemctl enable apache2.service
 systemctl restart apache2.service
 systemctl status apache2.service
 
-openstack project list | grep service > /dev/null 2>&1
-if [ $? -ne 0 ]
-  then
-    openstack project create --domain default --description "Service Project" service
-fi
+openstack project list | grep service > /dev/null 2>&1 && echo "service project already exist" || openstack project create --domain default --description "Service Project" service
 openstack project list
 
 [ ! -f /etc/keystone/keystone-paste.ini.orig ] && cp -v /etc/keystone/keystone-paste.ini /etc/keystone/keystone-paste.ini.orig
 sed -i 's/pipeline = cors sizelimit http_proxy_to_wsgi osprofiler url_normalize request_id admin_token_auth build_auth_context token_auth json_body ec2_extension public_service/pipeline = cors sizelimit http_proxy_to_wsgi osprofiler url_normalize request_id build_auth_context token_auth json_body ec2_extension public_service/g' /etc/keystone/keystone-paste.ini
 sed -i 's/pipeline = cors sizelimit http_proxy_to_wsgi osprofiler url_normalize request_id admin_token_auth build_auth_context token_auth json_body ec2_extension s3_extension admin_service/pipeline = cors sizelimit http_proxy_to_wsgi osprofiler url_normalize request_id build_auth_context token_auth json_body ec2_extension s3_extension admin_service/g' /etc/keystone/keystone-paste.ini
 sed -i 's/pipeline = cors sizelimit http_proxy_to_wsgi osprofiler url_normalize request_id admin_token_auth build_auth_context token_auth json_body ec2_extension_v3 s3_extension service_v3/pipeline = cors sizelimit http_proxy_to_wsgi osprofiler url_normalize request_id build_auth_context token_auth json_body ec2_extension_v3 s3_extension service_v3/g' /etc/keystone/keystone-paste.ini
+
 openstack token issue
