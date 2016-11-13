@@ -1,0 +1,190 @@
+##### Launch Instance BUI #####
+#Run a web browser open the URL http://$IPMAN
+
+#0 Login as admin with password from PASSWORD variable
+cat os.conf
+
+#1 Create images
+Admin > System > Images
+Click Create Image
+Name: cirros0
+Image Source: Image Location
+Image Location: http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
+Format: QCOW2
+Copy Data: Checked
+Public: Checked
+Protected: Checked
+
+#2 Create external network
+Admin > System > Networks
+Click Create Network
+Name: net-ext
+Project: admin
+Provider Network Type: flat
+Physical Network: external
+Admin State: Up
+Shared: Checked
+External Network: Checked
+
+#3 Create external subnet
+Admin > System > Networks
+Click net-ext
+Click Create Subnet
+Subnet Name: subnet-ext
+Network Address: 172.16.10.0/24
+IP Version: IPv4
+Gateway IP: 172.16.10.1
+Enable DHCP: Unchecked
+Allocation Pools: 172.16.10.100,172.16.10.199
+DNS Name Servers: 172.16.10.1
+
+#4 Create internal network & subnet
+Project > Network > Networks
+Click Create Network
+Network Name: net-int0
+Admin State: Up
+Create Subnet: Checked
+Subnet Name: subnet-int0
+Network Address: 192.168.10.0/24
+IP Version: IPv4
+Gateway IP: 192.168.10.1
+Enable DHCP: Checked
+Allocation Pools: 192.168.10.100,192.168.10.199
+DNS Name Servers: 172.16.10.1
+
+#5 Create router
+Project > Network > Routers
+Click Create Router
+Router Name: router0
+Admin State: UP
+External Network: net-ext
+
+Click router0
+Click Interfaces
+Click Add Interface
+Subnet: subnet-int0
+
+Ping from host to port net-ext router0
+ping -c 3 172.16.10.YYY
+
+#6 Add SSH key
+Project > Compute > Access & Security > Key Pairs
+Click Import Key Pair
+Key Pair Name: key0
+Public Key: [copy and paste SSH public key]
+
+#7 Add security group rules
+Project > Compute > Access & Security > Security Groups
+Click Create Security Group
+Name: sg0
+Description: My security group 0
+Click Manage Rules on sg0
+
+Click Add Rule
+Rule: ALL ICMP
+Direction: Ingress
+Remote: CIDR
+CIDR: 0.0.0.0/0
+
+Click Add Rule
+Rule: SSH
+Remote: CIDR
+CIDR: 0.0.0.0/0
+
+#8 Launch instance
+Project > Compute > Instance
+Click Launch Instance
+Instance Name: instance0
+Flavor: m1.tiny
+Instance Boot Source: Boot from image
+Image Name: cirros
+Key Pair: key0
+Security Group: sg0
+Selected networks: net-int0
+
+#9 Floating IP address
+Click Associate Floating IP
+Click + Alocate Floating IP
+Pool: net-ext
+Click Allocate IP
+IP Address: 172.16.10.1YY
+Port to be associated: instance0 192.168.10.1YY
+
+
+##### Launch Instance CLI #####
+
+#0 Login as admin with password PASSWORD
+source admin-openrc
+
+#1 Create images
+openstack image list
+yum -y install wget
+wget -c http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
+openstack image create --disk-format qcow2 --file cirros-0.3.4-x86_64-disk.img --protected --public cirros1
+openstack image list
+
+#2 Create external network
+neutron net-list
+neutron net-create net-ext --provider:network_type flat --provider:physical_network external --shared --router:external
+neutron net-list
+
+#3 Create external subnet
+neutron subnet-list
+neutron subnet-create net-ext 172.16.10.0/24 --name subnet-ext --gateway 172.16.10.1 --disable-dhcp --allocation-pool start=172.16.10.100,end=172.16.10.199 --dns-nameserver 172.16.10.1
+neutron subnet-list
+
+#4 Create internal network
+neutron net-list
+neutron net-create net-int1
+neutron net-list
+
+#5 Create internal subnet
+neutron subnet-list
+neutron subnet-create net-int1 192.168.11.0/24 --name subnet-int1 --gateway 192.168.11.1 --allocation-pool start=192.168.11.100,end=192.168.11.199 --dns-nameserver 172.16.10.1
+neutron subnet-list
+neutron net-list
+
+#6 Create router
+neutron router-list
+neutron router-create router1
+neutron router-gateway-set router1 net-ext
+neutron router-interface-add router1 subnet-int1
+neutron router-list
+neutron router-port-list router1
+
+Ping from host to port net-ext router1
+ping -c 3 172.16.10.1YY
+
+#7 Add SSH key
+openstack keypair list
+openstack keypair create --public-key ~/id_rsa.pub key1
+openstack keypair list
+
+#8 Add security group rules
+openstack security group list
+openstack security group create sg1 --description 'My security group 1'
+openstack security group list
+openstack security group rule list sg1
+openstack security group rule create --proto icmp sg1
+openstack security group rule create --proto tcp --dst-port 22 sg1
+openstack security group rule list sg1
+
+#9 Launch instance
+openstack server list
+openstack flavor list
+openstack image list
+openstack security group list
+openstack keypair list
+neutron net-list
+openstack server create --flavor m1.tiny --image cirros1 --key-name key1 --security-group sg1 --nic net-id=[NET-INT-ID] instance1
+openstack server list
+
+#10 Floating IP address
+openstack ip floating list
+openstack ip floating pool list
+openstack ip floating create net-ext
+openstack ip floating list
+openstack server list
+openstack ip floating add 172.16.10.1YY instance1
+openstack server list
+openstack ip floating list
