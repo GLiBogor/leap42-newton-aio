@@ -7,7 +7,15 @@ Main reference: http://docs.openstack.org/newton/install-guide-obs/
 __Requirements__
 * CPU 4 cores
 * RAM 8 GB
-* HDD 30 GB (sda1 / 16GB XFS, sda2 SWAP 4GB, sda3 Extended all remaining disk space, sda5 LVM 5GB, sda6 XFS 1GB, sda7 XFS 1GB)
+* HDD 30 GB
+  * sda1 / XFS 16GB
+  * sda2 SWAP 4GB
+  * sda3 Extended all remaining disk space
+  * sda5 LVM (PV) 5GB
+  * sda6 XFS 1GB
+  * sda7 XFS 1GB
+  * sda8 XFS 1GB
+  * sda9 XFS 1GB
 * openSUSE Leap 42 minimal installation
 
 __Topology__
