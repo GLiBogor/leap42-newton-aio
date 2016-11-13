@@ -220,6 +220,12 @@ recon_cache_path = /var/cache/swift
 
 [filter:xprofile]
 use = egg:swift#xprofile
+
+[account-replicator]
+
+[account-auditor]
+
+[account-reaper]
 _EOF_
 
 [ ! -f /etc/swift/container-server.conf.orig ] && cp -v /etc/swift/container-server.conf /etc/swift/container-server.conf.orig
@@ -247,6 +253,12 @@ recon_cache_path = /var/cache/swift
 
 [filter:xprofile]
 use = egg:swift#xprofile
+
+[container-replicator]
+
+[container-auditor]
+
+[container-updater]
 _EOF_
 
 [ ! -f /etc/swift/object-server.conf.orig ] && cp -v /etc/swift/object-server.conf /etc/swift/object-server.conf.orig
@@ -275,6 +287,12 @@ recon_lock_path = /var/lock
 
 [filter:xprofile]
 use = egg:swift#xprofile
+
+[object-replicator]
+
+[object-auditor]
+
+[object-updater]
 _EOF_
 
 chown -R swift:swift /srv/node
