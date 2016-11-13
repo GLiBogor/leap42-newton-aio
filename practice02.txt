@@ -1,0 +1,53 @@
+##### Cinder #####
+
+### BUI Volume Attachment ###
+
+Project > Compute > Volume
+Click Create Volume
+Volume Name: vol0
+Type: iscsi
+Size: 1 GB
+
+Click Manage Attachments
+Attach to instance: instance0
+
+### Verify Volume Attachment ###
+Use console/SSH access to instance0
+sudo fdisk -l
+
+Detach and delete vol0
+
+### CLI Volume Attachment ###
+openstack volume list
+openstack volume create --type iscsi --size 1 vol1
+openstack volume list
+openstack server add volume instance1 vol1
+openstack volume list
+openstack server remove volume instance1 vol1
+openstack volume list
+openstack volume delete vol1
+openstack volume list
+
+### BUI Volume Source Image ###
+Project > Compute > Volume
+Click Create Volume
+Volume Name: vol2
+Volume Source: Image
+Use image as a source: cirros0
+Type: iscsi
+Size: 1 GB
+
+Click Launch as Instance
+Instance Name: instance2
+Flavor: m1.tiny
+Instance Boot Source: Boot from volume
+Volume: vol2
+Key Pair: key0
+Security Group: sg0
+Selected networks: net-int0
+
+### CLI Volume Source Image ###
+openstack volume create --image cirros1 --type iscsi --size 1 vol3
+neutron net-list
+openstack server create --flavor m1.tiny --volume vol3 --key-name key1 --security-group sg1 --nic net-id=[NET-INT-ID] instance3
+openstack server list
