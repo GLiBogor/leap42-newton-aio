@@ -4,49 +4,22 @@ source os.conf
 source admin-openrc
 
 ##### Nova Compute Service #####
-mysql -u root -p$PASSWORD -e "SHOW DATABASES;" | grep nova > /dev/null 2>&1 && echo "nova database exists"
-if [ $? -ne 0 ]
-  then
-    mysql -u root -p$PASSWORD -e "CREATE DATABASE nova; GRANT ALL PRIVILEGES ON nova.* TO 'nova'@'localhost' IDENTIFIED BY '$PASSWORD'; GRANT ALL PRIVILEGES ON nova.* TO 'nova'@'%' IDENTIFIED BY '$PASSWORD';"
-  fi
+mysql -u root -p$PASSWORD -e "SHOW DATABASES;" | grep nova > /dev/null 2>&1 && echo "nova database already exists" || mysql -u root -p$PASSWORD -e "CREATE DATABASE nova; GRANT ALL PRIVILEGES ON nova.* TO 'nova'@'localhost' IDENTIFIED BY '$PASSWORD'; GRANT ALL PRIVILEGES ON nova.* TO 'nova'@'%' IDENTIFIED BY '$PASSWORD';"
 
-mysql -u root -p$PASSWORD -e "SHOW DATABASES;" | grep nova_api > /dev/null 2>&1 && echo "nova_api database exists"
-if [ $? -ne 0 ]
-  then
-    mysql -u root -p$PASSWORD -e "CREATE DATABASE nova_api; GRANT ALL PRIVILEGES ON nova_api.* TO 'nova'@'localhost' IDENTIFIED BY '$PASSWORD'; GRANT ALL PRIVILEGES ON nova_api.* TO 'nova'@'%' IDENTIFIED BY '$PASSWORD';"
-  fi
+mysql -u root -p$PASSWORD -e "SHOW DATABASES;" | grep nova_api > /dev/null 2>&1 && echo "nova_api database already exists" || mysql -u root -p$PASSWORD -e "CREATE DATABASE nova_api; GRANT ALL PRIVILEGES ON nova_api.* TO 'nova'@'localhost' IDENTIFIED BY '$PASSWORD'; GRANT ALL PRIVILEGES ON nova_api.* TO 'nova'@'%' IDENTIFIED BY '$PASSWORD';"
 
-openstack user list | grep nova > /dev/null 2>&1 && echo "nova user exists"
-if [ $? -ne 0 ]
-  then
-    openstack user create --domain default --password $PASSWORD nova
-fi
+openstack user list | grep nova > /dev/null 2>&1 && echo "nova user already exists" || openstack user create --domain default --password $PASSWORD nova
 openstack role add --project service --user nova admin
 
-openstack service list | grep nova > /dev/null 2>&1 && echo "nova service exists"
-if [ $? -ne 0 ]
-  then
-    openstack service create --name nova --description "OpenStack Compute service" compute
-fi
+openstack service list | grep nova > /dev/null 2>&1 && echo "nova service already exists" || openstack service create --name nova --description "OpenStack Compute service" compute
 
-openstack endpoint list | grep public | grep nova > /dev/null 2>&1 && echo "nova public endpoint exists"
-if [ $? -ne 0 ]
-  then
-    openstack endpoint create --region RegionOne compute public http://$HOSTNAME:8774/v2.1/%\(tenant_id\)s
-fi
+openstack endpoint list | grep public | grep nova > /dev/null 2>&1 && echo "nova public endpoint already exists" || openstack endpoint create --region RegionOne compute public http://$HOSTNAME:8774/v2.1/%\(tenant_id\)s
 
-openstack endpoint list | grep internal | grep nova > /dev/null 2>&1 && echo "nova internal endpoint exists"
-if [ $? -ne 0 ]
-  then
-    openstack endpoint create --region RegionOne compute internal http://$HOSTNAME:8774/v2.1/%\(tenant_id\)s
-fi
+openstack endpoint list | grep internal | grep nova > /dev/null 2>&1 && echo "nova internal endpoint already exists" || openstack endpoint create --region RegionOne compute internal http://$HOSTNAME:8774/v2.1/%\(tenant_id\)s
 
-openstack endpoint list | grep admin | grep nova > /dev/null 2>&1 && echo "nova admin endpoint exists"
-if [ $? -ne 0 ]
-  then
-    openstack endpoint create --region RegionOne compute admin http://$HOSTNAME:8774/v2.1/%\(tenant_id\)s
-fi
-zypper -n in --no-recommends openstack-nova-api openstack-nova-scheduler openstack-nova-conductor openstack-nova-consoleauth openstack-nova-novncproxy iptables openstack-nova-compute genisoimage kvm libvirt
+openstack endpoint list | grep admin | grep nova > /dev/null 2>&1 && echo "nova admin endpoint already exists" || openstack endpoint create --region RegionOne compute admin http://$HOSTNAME:8774/v2.1/%\(tenant_id\)s
+
+echo -n "installing packages... " && zypper -n in --no-recommends openstack-nova-api openstack-nova-scheduler openstack-nova-conductor openstack-nova-consoleauth openstack-nova-novncproxy iptables openstack-nova-compute genisoimage kvm libvirt > /dev/null 2>&1 && echo "done"
 
 [ ! -f /etc/nova/nova.conf.orig ] && cp -v /etc/nova/nova.conf /etc/nova/nova.conf.orig
 cat << _EOF_ > /etc/nova/nova.conf
@@ -121,5 +94,6 @@ echo nbd > /etc/modules-load.d/nbd.conf
 systemctl enable openstack-nova-api.service openstack-nova-consoleauth.service openstack-nova-scheduler.service openstack-nova-conductor.service openstack-nova-novncproxy.service libvirtd.service openstack-nova-compute.service
 systemctl restart openstack-nova-api.service openstack-nova-consoleauth.service openstack-nova-scheduler.service openstack-nova-conductor.service openstack-nova-novncproxy.service libvirtd.service openstack-nova-compute.service
 systemctl status openstack-nova-api.service openstack-nova-consoleauth.service openstack-nova-scheduler.service openstack-nova-conductor.service openstack-nova-novncproxy.service libvirtd.service openstack-nova-compute.service
-sleep 10
+sleep 5
+
 openstack compute service list
