@@ -4,43 +4,20 @@ source os.conf
 source admin-openrc
 
 ##### Glance Image Service #####
-mysql -u root -p$PASSWORD -e "SHOW DATABASES;" | grep glance > /dev/null 2>&1 && echo "glance database exists"
-if [ $? -ne 0 ]
-  then
-    mysql -u root -p$PASSWORD -e "CREATE DATABASE glance; GRANT ALL PRIVILEGES ON glance.* TO 'glance'@'localhost' IDENTIFIED BY '$PASSWORD'; GRANT ALL PRIVILEGES ON glance.* TO 'glance'@'%' IDENTIFIED BY '$PASSWORD';"
-  fi
+mysql -u root -p$PASSWORD -e "SHOW DATABASES;" | grep glance > /dev/null 2>&1 && echo "glance database already exists" || mysql -u root -p$PASSWORD -e "CREATE DATABASE glance; GRANT ALL PRIVILEGES ON glance.* TO 'glance'@'localhost' IDENTIFIED BY '$PASSWORD'; GRANT ALL PRIVILEGES ON glance.* TO 'glance'@'%' IDENTIFIED BY '$PASSWORD';"
 
-openstack user list | grep glance > /dev/null 2>&1 && echo "glance user exists"
-if [ $? -ne 0 ]
-  then
-    openstack user create --domain default --password $PASSWORD glance
-fi
+openstack user list | grep glance > /dev/null 2>&1 && echo "glance user already exists" || openstack user create --domain default --password $PASSWORD glance
 openstack role add --project service --user glance admin
 
-openstack service list | grep glance > /dev/null 2>&1 && echo "glance service exists"
-if [ $? -ne 0 ]
-  then
-    openstack service create --name glance --description "OpenStack Image service" image
-fi
+openstack service list | grep glance > /dev/null 2>&1 && echo "glance service already exists" || openstack service create --name glance --description "OpenStack Image service" image
 
-openstack endpoint list | grep public | grep glance > /dev/null 2>&1 && echo "glance public endpoint exists"
-if [ $? -ne 0 ]
-  then
-    openstack endpoint create --region RegionOne image public http://$HOSTNAME:9292
-fi
+openstack endpoint list | grep public | grep glance > /dev/null 2>&1 && echo "glance public endpoint already exists" || openstack endpoint create --region RegionOne image public http://$HOSTNAME:9292
 
-openstack endpoint list | grep internal | grep glance > /dev/null 2>&1 && echo "glance internal endpoint exists"
-if [ $? -ne 0 ]
-  then
-    openstack endpoint create --region RegionOne image internal http://$HOSTNAME:9292
-fi
+openstack endpoint list | grep internal | grep glance > /dev/null 2>&1 && echo "glance internal endpoint already exists" || openstack endpoint create --region RegionOne image internal http://$HOSTNAME:9292
 
-openstack endpoint list | grep admin | grep glance > /dev/null 2>&1 && echo "glance admin endpoint exists"
-if [ $? -ne 0 ]
-  then
-    openstack endpoint create --region RegionOne image admin http://$HOSTNAME:9292
-fi
-zypper -n in --no-recommends openstack-glance openstack-glance-api openstack-glance-registry
+openstack endpoint list | grep admin | grep glance > /dev/null 2>&1 && echo "glance admin endpoint already exists" || openstack endpoint create --region RegionOne image admin http://$HOSTNAME:9292
+
+echo "install packages" && zypper -n in --no-recommends openstack-glance openstack-glance-api openstack-glance-registry > /dev/null 2>&1
 
 [ ! -f /etc/glance/glance-api.conf.orig ] && cp -v /etc/glance/glance-api.conf /etc/glance/glance-api.conf.orig
 cat << _EOF_ > /etc/glance/glance-api.conf
@@ -99,6 +76,8 @@ flavor = keystone
 _EOF_
 
 systemctl enable openstack-glance-api.service openstack-glance-registry.service
-systemctl start openstack-glance-api.service openstack-glance-registry.service
+systemctl restart openstack-glance-api.service openstack-glance-registry.service
 systemctl status openstack-glance-api.service openstack-glance-registry.service
+sleep 5
+
 glance image-list
