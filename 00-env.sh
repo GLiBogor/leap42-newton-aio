@@ -20,7 +20,7 @@ ntpq -p
 
 
 ##### Repositories #####
-[ ! -f /etc/zypp/repos.d/Newton.repo ] && zypper ar -f obs://Cloud:OpenStack:Newton/openSUSE_Leap_42.1 Newton
+[ ! -f /etc/zypp/repos.d/Newton.repo ] && zypper ar -f obs://Cloud:OpenStack:Newton/openSUSE_Leap_42.2 Newton
 zypper --gpg-auto-import-keys ref && zypper -n up --skip-interactive
 zypper -n in --no-recommends python-openstackclient
 
