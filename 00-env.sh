@@ -50,7 +50,12 @@ fi
 
 
 ##### RabbitMQ Service #####
-zypper -n in --no-recommends rabbitmq-server
+zypper -n in --no-recommends erlang-epmd rabbitmq-server
+[ ! -f /usr/lib/systemd/system/epmd.socket.orig ] && cp -v /usr/lib/systemd/system/epmd.socket /usr/lib/systemd/system/epmd.socket.orig
+sed -i 's/ListenStream=127.0.0.1:4369/ListenStream=0.0.0.0:4369/g' /usr/lib/systemd/system/epmd.socket
+systemctl daemon-reload
+systemctl restart epmd.socket epmd.service
+systemctl status epmd.socket epmd.service
 systemctl enable rabbitmq-server.service
 systemctl restart rabbitmq-server.service
 systemctl status rabbitmq-server.service
