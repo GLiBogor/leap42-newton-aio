@@ -3,3 +3,10 @@ rm -rf /etc/zypp/repos.d/*
 scp student@10.99.99.254:/etc/zypp/repos.d/* /etc/zypp/repos.d 
 zypper ref
 zypper dup
+
+wget -c https://github.com/GLiBogor/leap42-newton-aio/archive/master.zip
+unzip master.zip
+cd leap42-newton-aio-master
+ls
+chmod +x *.sh
+./00-env.sh
