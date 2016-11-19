@@ -1,0 +1,5 @@
+cp -r /etc/zypp/repos.d /etc/zypp/repos.d.orig
+rm -rf /etc/zypp/repos.d/*
+scp student@10.99.99.254:/etc/zypp/repos.d/* /etc/zypp/repos.d 
+zypper ref
+zypper dup
