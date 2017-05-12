@@ -21,7 +21,7 @@ driver = sql
 connection = mysql+pymysql://keystone:$PASSWORD@$HOSTNAME/keystone
 
 [signing]
-cert_subject = /C=US/ST=Unset/L=Unset/O=Unset/CN=pod10
+cert_subject = /C=US/ST=Unset/L=Unset/O=Unset/CN=$HOSTNAME
 
 [token]
 provider = fernet
