@@ -17,6 +17,7 @@ __Requirements__
   * sda8 XFS 1GB
   * sda9 XFS 1GB
 * openSUSE Leap 42 minimal installation
+* Internet connection
 
 __Topology__
 
